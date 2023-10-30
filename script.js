@@ -101,19 +101,24 @@ function buttonClicked() {
 }
 
 function add() {
-    return firstNum + secNum;
+    let result = firstNum + secNum;
+    return Math.round(result * 100) / 100;
 }
 
 function sub() {
-    return firstNum - secNum;
+    result = firstNum - secNum;
+    return Math.round(result * 100) / 100;
+
 }
 
 function mult() {
-    return firstNum * secNum;
+    result = firstNum * secNum;
+    return Math.round(result * 100) / 100;
 }
 
 function div() {
-    return firstNum / secNum;
+    result = firstNum / secNum;
+    return Math.round(result * 100) / 100;
 }
 
 function reset() {
@@ -132,7 +137,12 @@ function logic(boxes, option) {
             }
         }
     } else if (option === "operatorLogic") {
-        display.textContent = calc;
+        console.log("hello");
+        if (calc.toString().length > 10) {
+            display.textContent = "Invalid Number"
+        } else {
+            display.textContent = calc;
+        }
         reset();
         firstNum = calc;
     }
