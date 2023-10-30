@@ -1,5 +1,5 @@
 const container = document.querySelector(".buttonsContainer");
-let display = document.querySelector(".topDisplay");
+let display = document.querySelector(".displayText");
 let firstNum;
 var secNum;
 let thirdNum;
@@ -42,7 +42,7 @@ function nameButtons() {
     box[11].textContent = "*";
     box[11].id = "boxMultiply";
     box[12].textContent = "0";
-    box[13].textContent = "Clear";
+    box[13].textContent = "C";
     box[13].id = "boxClear";
     box[14].textContent = "=";
     box[14].id = "boxEqual";
@@ -92,7 +92,7 @@ function buttonClicked() {
         } else if (boxes.id === "boxClear") {
             reset();
             calc = undefined;
-            display.textContent = calc;
+            display.textContent = "0";
         }
 
 
@@ -172,4 +172,5 @@ function getNumbers(item) {
 createDivs(4,4);
 box = document.querySelectorAll('.box');
 nameButtons();
+display.textContent = "0";
 buttonClicked();
