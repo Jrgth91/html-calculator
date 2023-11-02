@@ -19,7 +19,9 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 500px;
+    width: 60vw;
+    max-width: 480px;
+    min-width: 300px;
     border-radius: 8px;
     background-color: rgb(233, 233, 233);
     box-shadow: rgba(0, 0, 0, .3) 4px 4px 5px;
@@ -48,8 +50,8 @@ body {
 .buttonsContainer {
     display: flex;
     flex-direction: column;
-    height:280px;
-    width:400px;
+    height:250px;
+    width:80%;
     margin-bottom: 30px;
 }
 
@@ -67,7 +69,7 @@ body {
     margin: 0.5px;
     margin-right: 6px;
     background-color: rgb(133, 133, 133);
-    font-size: 40px;
+    font-size: 2em;
     color: rgb(248, 248, 236);
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     border-radius: 6px;
@@ -84,7 +86,11 @@ body {
     background-color: rgb(132, 74, 186);
 }
 
-#boxAdd, #boxSubtract, #boxDivide, #boxMultiply {
+#boxAllClear {
+    background-color: rgb(103, 13, 188);
+}
+
+#boxAdd, #boxSubtract, #boxDivide, #boxMultiply, #boxExponent {
     background-color: rgb(70, 70, 70);
 }
 
