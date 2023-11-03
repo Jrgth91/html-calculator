@@ -1,10 +1,15 @@
 
 const container = document.querySelector(".buttonsContainer");
 let display = document.querySelector(".displayText");
+let upperDisplay = document.querySelector(".upperDisplay");
 let firstNum;
 var secNum;
 let operator;
 let calc;
+let memCounter = 0;
+upperDisplay.textContent = "0";
+let memory = [];
+let isOn = false;
 
 // Dynamically adds divs for button layout
 function createDivs(rows, divs) {
@@ -20,7 +25,6 @@ function createDivs(rows, divs) {
         }   
     }
 }
-
 // Adds text and data to buttons needed for display, functions and logic
 function nameButtons() {
     box[0].textContent = "7";
@@ -45,15 +49,22 @@ function nameButtons() {
     box[14].id = "boxEqual";
     box[15].textContent = "+";
     box[15].id = "boxAdd";
-    box[16].textContent = "AC";
+    box[16].textContent = "C";
     box[16].id = "boxClear"
-    box[17].textContent = "C";
-    box[17].id = "boxClear";
-    box[18].textContent = "<";
-    box[18].id = "boxBack"
+    box[17].textContent = "<";
+    box[17].id = "boxBack";
+    box[18].textContent = ">";
+    box[18].id = "boxForward"
     box[19].textContent = "E";
     box[19].dataset.name = "^";
     box[19].id = "boxExponent";
+    box[20].textContent = "AC";
+    box[20].id = "boxClearAC";
+    box[21].id = "Notset";
+    box[22].id = "Notset";
+    box[23].textContent = "Last Res Off";
+    box[23].id = "boxLastCalc";
+    
 
 }
 
@@ -85,6 +96,12 @@ function buttonClicked() {
 
         } else if (boxes.id === "boxExponent") {
             logic(boxes.dataset.name, "clickLogic");
+            
+        } else if (boxes.id === "boxBack") {
+            viewMemory("backward",);
+
+        } else if (boxes.id === "boxForward") {
+            viewMemory("forward");
 
         } else if (boxes.id === "boxEqual"  && secNum !== undefined) {
             convertStrings();
@@ -107,13 +124,21 @@ function buttonClicked() {
             } else if (operator === "^") {
                 calc = exponent();
                 logic(boxes.dataset.name, "operatorLogic");
-
             } 
 
         } else if (boxes.id === "boxClear") {
             reset();
             calc = undefined;
             display.textContent = "0";
+
+        } else if (boxes.id === "boxClearAC") {
+            reset();
+            memory = [];
+            calc = undefined;
+            display.textContent = "0";
+        } else if (boxes.id === "boxLastCalc") {
+            toggleBox(boxes);
+
         }
     }))
 }
@@ -151,6 +176,50 @@ function reset() {
     operator = undefined;
 }
 
+function saveData(data) {
+    memory.push(data);
+    upperDisplay.textContent = data;
+}
+
+function toggleBox(box) {
+    if (isOn === true) {
+        box.textContent = "Last Res Off";
+        box.style.backgroundColor = "rgb(70, 70, 70)";
+        upperDisplay.style.display = "none";
+        isOn = false;
+    } else {
+        box.textContent = "Last Res On";
+        box.style.backgroundColor = "rgb(55, 84, 13)";
+        upperDisplay.style.display = "block";
+        isOn = true;
+    }
+}
+// This is a simple memory system that allows us to access saved calculated numbers in the "memory" array
+function viewMemory(action) {
+    if (action === "backward") {
+        if (memory.length > 0 && memCounter < memory.length) {
+            display.textContent = memory[memCounter];
+            firstNum = memory[memCounter];
+            memCounter += 1;
+            console.log(memCounter);
+
+        } else if (memory.length > 0) {
+            display.textContent = memory[(memory.length - 1)];
+        }
+    } else if (action === "forward") {
+        if (memory.length > 0 && memCounter > 1) {
+            memCounter -= 1;
+            firstNum = memory[memCounter - 1];
+            display.textContent = memory[memCounter - 1];
+            console.log(memCounter);
+
+        } else if (memory.length < memCounter) {
+            display.textContent = memory[(memory.length - 1)];
+        }
+    }
+
+}
+
 // Some display logic to prevent doubles of the operator between numbers
 // and display errors when calculated number is longer than the  display
 
@@ -178,11 +247,12 @@ function logic(boxes, option) {
         } else {
             display.textContent = calc;
         }
+        saveData(calc);
         reset();
         firstNum = calc;
+        console.log(memory);
     }
 }
-
 
 // This function prevents multiple decimals to be displayed aswell as
 // update the display, this can definetly be shortened
@@ -224,23 +294,26 @@ function getNumbers(item, property) {
         if (secNum === undefined) {
             if (property !== "decimal") {
                 secNum = number;
-                display.textContent += secNum;
+                display.textContent += number;
                 console.log(number);
             }
         } else {
             if (property === "decimal") {
                 if (!secNum.includes("."))
                 {
-                    secNum = ".";
-                    display.textContent += secNum
+                    secNum += ".";
+                    display.textContent += "."
+                    console.log(secNum);
+                }
             } else {
+                secNum += number;
+                console.log(secNum)
                 display.textContent += number;
             }
 
         }
 
     }
-}
 }
 
 // converts the final display string into an array then
@@ -261,7 +334,7 @@ function convertStrings() {
 }
 
 // main
-createDivs(5,4);
+createDivs(6,4);
 box = document.querySelectorAll('.box');
 nameButtons();
 display.textContent = "0";
