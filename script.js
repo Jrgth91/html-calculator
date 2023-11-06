@@ -1,15 +1,15 @@
-
+// Cache DOM Elements
 const container = document.querySelector(".buttonsContainer");
 let display = document.querySelector(".displayText");
 let upperDisplay = document.querySelector(".upperDisplay");
-let firstNum;
-var secNum;
 let operator;
-let calc;
-let memCounter = 0;
-upperDisplay.textContent = "0";
-let memory = [];
-let isOn = false;
+let firstNum;
+let secNum;
+let fullEx;
+let result;
+let box;
+let row;
+let hasDecimal = false;
 
 // Dynamically adds divs for button layout
 function createDivs(rows, divs) {
@@ -24,321 +24,222 @@ function createDivs(rows, divs) {
             rowDiv.appendChild(colDiv);
         }   
     }
+    box = document.querySelectorAll(".box");
+    row = document.querySelectorAll(".row");
 }
+
 // Adds text and data to buttons needed for display, functions and logic
 function nameButtons() {
-    box[0].textContent = "7";
-    box[1].textContent = "8";
-    box[2].textContent = "9";
-    box[3].textContent = "/";
-    box[3].id = "boxDivide";
-    box[4].textContent = "4";
-    box[5].textContent = "5";
-    box[6].textContent = "6";
-    box[7].textContent = "*";
-    box[7].id = "boxMultiply";
-    box[8].textContent = "1";
-    box[9].textContent = "2";
-    box[10].textContent = "3";
-    box[11].textContent = "-";
-    box[11].id = "boxSubtract";
-    box[12].textContent = "0";
-    box[13].textContent = ".";
-    box[13].id = "boxDecimal";
-    box[14].textContent = "=";
-    box[14].id = "boxEqual";
-    box[15].textContent = "+";
-    box[15].id = "boxAdd";
-    box[16].textContent = "C";
-    box[16].id = "boxClear"
+    
+    let values = [
+    "7", "8", "9", "/", 
+    "4", "5", "6", "*", 
+    "1", "2", "3", "-", 
+    "0", ".", "=", "+", 
+    "C", "ArrowLeft", "ArrowRight", "E", 
+    "AC", "", "", "Last Res Off"];
+    let ids = [
+    "boxNumber", "boxNumber", "boxNumber", "boxDivide", 
+    "boxNumber", "boxNumber", "boxNumber", "boxMultiply", 
+    "boxNumber", "boxNumber", "boxNumber", "boxSubtract", 
+    "boxNumber", "boxDecimal", "boxEqual", "boxAdd", 
+    "boxClear", "boxBack", "boxForward", "boxExponent", 
+    "boxClearAC", "Notset", "boxLastCalc", "boxLastCalc"];
+      for (let i = 0; i < box.length; i++) {
+        box[i].textContent = values[i];
+        box[i].dataset.key = values[i];
+        box[i].id = ids[i];
+    }
+    box[16].dataset.key = "c";
     box[17].textContent = "<";
-    box[17].id = "boxBack";
     box[18].textContent = ">";
-    box[18].id = "boxForward"
-    box[19].textContent = "E";
-    box[19].dataset.name = "^";
-    box[19].id = "boxExponent";
-    box[20].textContent = "AC";
-    box[20].id = "boxClearAC";
-    box[21].id = "Notset";
-    box[22].id = "Notset";
-    box[23].textContent = "Last Res Off";
-    box[23].id = "boxLastCalc";
-    
-
+    box[19].dataset.key = "e";
+    box[20].dataset.key = "a";
+    box[23].parentNode.removeChild(box[23]);
+    box[20].style.flex = "1";
+    box[21].style.flex = "1";
+    box[22].style.flex = "2";
+    box[22].textContent = "Display Last Number";
 }
 
-// Adds event listeners to buttons 
-// There should be a few ways to shorten this. 
-function buttonClicked() {
-    box.forEach(boxes => boxes.addEventListener("mousedown", function(e){
-        boxes.classList.add("clicked");
-    }));
-    box.forEach(boxes => boxes.addEventListener("mouseup", function() {
-        boxes.classList.remove("clicked");
-        if (boxes.id === "boxNumber") {
-            getNumbers(boxes, "number");
-
-        } else if (boxes.id === "boxDecimal") {
-            getNumbers(boxes, "decimal")
-
-        } else if (boxes.id === "boxAdd") {
-            logic(boxes.textContent, "clickLogic");
-
-        } else if (boxes.id === "boxSubtract") {
-            logic(boxes.textContent, "clickLogic");
-
-        } else if (boxes.id === "boxMultiply") {
-            logic(boxes.textContent, "clickLogic");
-
-        } else if (boxes.id === "boxDivide") {
-            logic(boxes.textContent, "clickLogic");
-
-        } else if (boxes.id === "boxExponent") {
-            logic(boxes.dataset.name, "clickLogic");
+function clickEvents() {
+    container.addEventListener("mousedown", function(e) {
+        if (e.target.classList.contains("box")) {
+            e.target.classList.add("clicked");
+        }
+    });
+    container.addEventListener("mouseup", function(e) {
+        if (e.target.classList.contains("box")) {
+            e.target.classList.remove("clicked");
+            let data = e.target.textContent;
             
-        } else if (boxes.id === "boxBack") {
-            viewMemory("backward",);
-
-        } else if (boxes.id === "boxForward") {
-            viewMemory("forward");
-
-        } else if (boxes.id === "boxEqual"  && secNum !== undefined) {
-            convertStrings();
-            if (operator === "+") {
-                calc = add();
-                logic(boxes.textContent, "operatorLogic");
-
-            } else if (operator === "-") {
-                calc = sub();
-                logic(boxes.textContent, "operatorLogic");
-
-            } else if (operator === "*") {
-                calc = mult();
-                logic(boxes.textContent, "operatorLogic");
-
-            } else if (operator === "/") {
-                calc = div();
-                logic(boxes.textContent, "operatorLogic");
-
-            } else if (operator === "^") {
-                calc = exponent();
-                logic(boxes.dataset.name, "operatorLogic");
-            } 
-
-        } else if (boxes.id === "boxClear") {
-            reset();
-            calc = undefined;
-            display.textContent = "0";
-
-        } else if (boxes.id === "boxClearAC") {
-            reset();
-            memory = [];
-            calc = undefined;
-            display.textContent = "0";
-        } else if (boxes.id === "boxLastCalc") {
-            toggleBox(boxes);
-
-        }
-    }))
-}
-
-// Math functions
-function add() {
-    let result = firstNum + secNum;
-    return Math.round(result * 100) / 100;
-}
-
-function sub() {
-    result = firstNum - secNum;
-    return Math.round(result * 100) / 100;
-
-}
-
-function mult() {
-    result = firstNum * secNum;
-    return Math.round(result * 100) / 100;
-}
-
-function div() {
-    result = firstNum / secNum;
-    return Math.round(result * 100) / 100;
-}
-
-function exponent() {
-    result = firstNum ** secNum;
-    return Math.round(result * 100) / 100;
-}
-
-function reset() {
-    firstNum = undefined;
-    secNum = undefined;
-    operator = undefined;
-}
-
-function saveData(data) {
-    memory.push(data);
-    upperDisplay.textContent = data;
-}
-
-function toggleBox(box) {
-    if (isOn === true) {
-        box.textContent = "Last Res Off";
-        box.style.backgroundColor = "rgb(70, 70, 70)";
-        upperDisplay.style.display = "none";
-        isOn = false;
-    } else {
-        box.textContent = "Last Res On";
-        box.style.backgroundColor = "rgb(55, 84, 13)";
-        upperDisplay.style.display = "block";
-        isOn = true;
-    }
-}
-// This is a simple memory system that allows us to access saved calculated numbers in the "memory" array
-function viewMemory(action) {
-    if (action === "backward") {
-        if (memory.length > 0 && memCounter < memory.length) {
-            display.textContent = memory[memCounter];
-            firstNum = memory[memCounter];
-            memCounter += 1;
-            console.log(memCounter);
-
-        } else if (memory.length > 0) {
-            display.textContent = memory[(memory.length - 1)];
-        }
-    } else if (action === "forward") {
-        if (memory.length > 0 && memCounter > 1) {
-            memCounter -= 1;
-            firstNum = memory[memCounter - 1];
-            display.textContent = memory[memCounter - 1];
-            console.log(memCounter);
-
-        } else if (memory.length < memCounter) {
-            display.textContent = memory[(memory.length - 1)];
-        }
-    }
-
-}
-
-// Some display logic to prevent doubles of the operator between numbers
-// and display errors when calculated number is longer than the  display
-
-function logic(boxes, option) {
-    if (option === "clickLogic") {
-        if (firstNum !== null && secNum === undefined && operator === undefined) {
-            if (firstNum !== undefined) {
-                operator = `${boxes}`;
-                display.textContent = `${firstNum} ${operator} `;
-            } 
-        } else if ( operator !== undefined) {
-            
-             operator = `${boxes}`;
-             display.textContent = `${firstNum} ${operator} `;
-             if (secNum !== undefined) {
-            operator = `${boxes}`;
-             display.textContent = `${firstNum} ${operator} ${secNum}`;
-             }
+            switch(e.target.textContent) {
+                case "7":
+                case "8":
+                case "9":
+                case "4":
+                case "5":
+                case "6":
+                case "1":
+                case "2":
+                case "3":
+                case "0":
+                    logic("Number", data);
+                    break;
+                case "+":
+                case "-":
+                case "/":
+                case "*":
+                case "E":
+                    if (firstNum !== undefined && secNum === undefined) {
+                        operator = e.target.textContent;
+                    }
+                    logic("Operator", data);
+                    break;
+                case "A":
+                case "C":
+                    logic("Clear", data);
+                    break;
+                case ".":
+                    checkDecimal();
+                    break;
+                case "Last Res Off":
+                case "<":
+                case ">":
+                case "=":
+                    if (operator !== undefined && secNum !== undefined) {
+                        result = doMath(operator);
+                        display.textContent = result;
+                        firstNum = fullEx = result.toString();
+                        operator = undefined;
+                        secNum = undefined;
+                    }
+            }
         } 
-    } else if (option === "operatorLogic") {
-        if (calc.toString().length > 10) {
-            display.textContent = "Error"
-            calc = undefined;
-            
-        } else {
-            display.textContent = calc;
-        }
-        saveData(calc);
-        reset();
-        firstNum = calc;
-        console.log(memory);
-    }
+    }); 
 }
 
-// This function prevents multiple decimals to be displayed aswell as
-// update the display, this can definetly be shortened
-function getNumbers(item, property) {
-    let number = item.textContent;
-    if (operator === undefined && firstNum !== null) {
-        if (firstNum === undefined) {
-            if (property === "decimal") {
-                firstNum = 0;
-                firstNum += ".";
-                display.textContent = firstNum;
-                // firstNum = parseFloat(firstNum);
-            } else {
-                firstNum = number;
-                display.textContent = firstNum;
-                console.log(typeof firstNum);
-                //return firstNum;
-                //console.log(number);
-            }
+function logic(type, item) {
 
+    switch(type) {
+        case "Number":
+        let number = item;
+        if  (operator === undefined) {
+            if (firstNum === undefined) {
+                firstNum = item;
+                fullEx = firstNum;
+            } else if (firstNum !== undefined && secNum === undefined) {
+                firstNum += number;
+                fullEx += number;
+            } 
+            display.textContent = fullEx;
         } else {
-            if (property === "decimal" && !firstNum.includes(".")) {
-                firstNum += ".";
-                display.textContent = firstNum;
-                console.log("float!")
-                // console.log(typeof firstNum) 
-
-            } else {
-                if (property !== "decimal") {
-                    firstNum += number;
-                    display.textContent = firstNum;
-                    //return firstNum;
-                    //console.log(number);
-                }
-            }
-        }
-    
-    } else { 
-        if (secNum === undefined) {
-            if (property !== "decimal") {
+            if (secNum === undefined) {
                 secNum = number;
-                display.textContent += number;
-                console.log(number);
-            }
-        } else {
-            if (property === "decimal") {
-                if (!secNum.includes("."))
-                {
-                    secNum += ".";
-                    display.textContent += "."
-                    console.log(secNum);
-                }
             } else {
                 secNum += number;
-                console.log(secNum)
-                display.textContent += number;
             }
+            display.textContent = fullEx = `${firstNum} ${operator} ${secNum}`;
+            
+        } 
+        break;
+        case "Operator":
+            display.textContent = fullEx = `${firstNum} ${operator} `;
+            break;
+        case "Clear":
+            firstNum = operator = secNum = undefined;
+            display.textContent = "0";
 
-        }
+    }
+    
+}
 
+function checkDecimal() {
+        
+        if (firstNum !== undefined && operator === undefined) {
+
+            if (!firstNum.includes(".")) {
+                firstNum += ".";
+                fullEx += ".";
+                hasDecimal = true;
+            } else {
+                hasDecimal = false;
+            } display.textContent = fullEx;
+        } else if (operator !== undefined && secNum !==undefined) {
+            if (!secNum.includes(".")) {
+                secNum += ".";
+                fullEx += ".";
+                hasDecimal = true
+            } else {
+                hasDecimal = false;
+            }  display.textContent = fullEx;
+        }         
+}
+
+function deleteChars() {
+    window.addEventListener("keydown", function(e) {
+        if (e.key === "Backspace") {
+            if (fullEx[(fullEx.length - 1)] === " ") {
+                console.log(fullEx[(fullEx.length - 1)]);
+                fullEx = fullEx.slice(0,-3);
+                display.textContent = fullEx;
+                if (operator === "") {
+                    fullEx = fullEx.slice(0,-1);
+                    console.log("here");
+                }
+            }  else if (fullEx.length > 1) {     
+                fullEx = fullEx.slice(0,-1);
+                display.textContent = fullEx;
+                
+            }   else if (fullEx.length === 1) {
+                display.textContent = "0";
+                operator = undefined;
+                firstNum = undefined;
+                secNum = undefined; 
+            }
+            if (firstNum !== undefined && operator !== undefined && secNum !== undefined) {
+                [firstNum,operator,secNum] = fullEx.split(" ");
+                console.log(firstNum,operator,secNum);
+            }
+        } 
+    })
+}
+
+function doMath(type) {
+    ///convert strings
+    let results;
+    [firstNum,operator,secNum] = fullEx.split(" ");
+    if (hasDecimal) {
+        firstNum = parseFloat(firstNum);
+        secNum = parseFloat(secNum);
+    } else {
+        firstNum = parseInt(firstNum);
+        secNum = parseInt(secNum);
+    }
+    switch(operator) {
+
+        case "+":
+            results = firstNum + secNum;
+            return Math.round(results * 100) / 100;
+        case "-":
+            results = firstNum - secNum;
+            return Math.round(results * 100) / 100;
+        case  "*":
+            results = firstNum * secNum;
+            return Math.round(results * 100) / 100;
+        case "/":
+            results = firstNum / secNum;
+            return Math.round(results * 100) / 100;
+        case "E":
+            results = firstNum ** secNum;
+            return Math.round(results * 100) / 100;
     }
 }
 
-// converts the final display string into an array then
-// converts the data as either an interger or float for calulations
-function convertStrings() {
-    string = display.textContent;
-    const numbers = string.split(` ${operator} `);
-    if (numbers[0].includes(".")) {
-        firstNum = parseFloat(numbers[0]);
-    } else {
-        firstNum = parseInt(numbers[0]);
-    }
-    if (numbers[1].includes(".")) {
-        secNum = parseFloat(numbers[1]);
-    } else {
-        secNum = parseInt(numbers[1]);
-    }
-}
-
-// main
-createDivs(6,4);
-box = document.querySelectorAll('.box');
-nameButtons();
+ 
+//Main
 display.textContent = "0";
-buttonClicked();
-
-
-
+createDivs(6,4);
+nameButtons();
+clickEvents();
+deleteChars();

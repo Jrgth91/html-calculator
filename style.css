@@ -112,7 +112,7 @@ body {
     background-color: rgb(70, 70, 70);
 }
 
-.row {
+.row, .row5 {
 
     display: flex;
     flex: auto;
